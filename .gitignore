@@ -1,0 +1,5 @@
+*.old
+input
+output
+a.out
+*.gch
