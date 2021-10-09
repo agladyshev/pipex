@@ -6,7 +6,7 @@
 /*   By: stiffiny <stiffiny@student.21-school.ru>   +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/09 17:21:51 by stiffiny          #+#    #+#             */
-/*   Updated: 2021/10/09 18:38:51 by stiffiny         ###   ########.fr       */
+/*   Updated: 2021/10/09 19:22:51 by stiffiny         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,12 +30,16 @@ int	exec_cmd(char *cmd, char **envp)
 	if (!path)
 	{
 		perror(args[0]);
-		return (1);
+		free_arr(args);
+		free(path);
+		return (9);
 	}
 	if (execve(path, args, envp) == -1)
 	{
 		perror(args[0]);
-		return (1);
+		free_arr(args);
+		free(path);
+		return (10);
 	}
 	return (0);
 }
