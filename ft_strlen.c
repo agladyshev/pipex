@@ -6,11 +6,11 @@
 /*   By: stiffiny <stiffiny@student.21-school.ru>   +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/04/19 16:11:10 by stiffiny          #+#    #+#             */
-/*   Updated: 2021/04/19 16:11:13 by stiffiny         ###   ########.fr       */
+/*   Updated: 2021/10/09 18:10:54 by stiffiny         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "libft.h"
+#include "pipex.h"
 
 size_t	ft_strlen(const char *s)
 {

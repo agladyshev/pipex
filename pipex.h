@@ -6,7 +6,7 @@
 /*   By: stiffiny <stiffiny@student.21-school.ru>   +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/09 17:54:44 by stiffiny          #+#    #+#             */
-/*   Updated: 2021/10/09 18:04:14 by stiffiny         ###   ########.fr       */
+/*   Updated: 2021/10/09 18:11:20 by stiffiny         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,6 +14,7 @@
 # define PIPEX_H
 
 # include <unistd.h>
+# include <stdlib.h>
 # include <fcntl.h>
 # include <stdio.h>
 # include <sys/wait.h>

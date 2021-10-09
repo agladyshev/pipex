@@ -6,11 +6,11 @@
 /*   By: stiffiny <stiffiny@student.21-school.ru>   +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/05/04 18:44:26 by stiffiny          #+#    #+#             */
-/*   Updated: 2021/05/06 21:16:45 by stiffiny         ###   ########.fr       */
+/*   Updated: 2021/10/09 18:10:44 by stiffiny         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "libft.h"
+#include "pipex.h"
 
 char	**free_str_arr(char **arr, int j)
 {
