@@ -1,78 +1,22 @@
-#include "pipex.h"
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   pipex.c                                            :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: stiffiny <stiffiny@student.21-school.ru>   +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2021/10/09 17:21:51 by stiffiny          #+#    #+#             */
+/*   Updated: 2021/10/09 17:30:59 by stiffiny         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include <errno.h>
 #include <string.h>
+#include "pipex.h"
 
-
-int	ft_find_substr(char *str, char *substr)
-{
-	if (!str || !substr)
-		return (-2);
-	int i;
-	int j;
-
-	i = 0;
-	j = 0;
-	while (str[i] != 0)
-	{
-		j = 0;
-		while (str[i + j] == substr[j])
-		{
-			j++;
-			if (substr[j] == 0)
-				return (i);
-		}
-		i++;
-	}
-	return (-1);
-}
-
-char	*ft_strjoin_del(char const *s1, char const *s2, char del)
+char	*resolve_path(char **envp, char *cmd)
 {
 	int		i;
-	int		j;
-	char	*p;
-
-	i = 0;
-	j = 0;
-	if (s1 == 0 || s2 == 0)
-		return (0);
-	p = malloc(ft_strlen(s1) + ft_strlen(s2) + 2);
-	if (p == 0)
-		return (0);
-	while (s1[j] != 0)
-	{
-		p[i] = s1[j];
-		i++;
-		j++;
-	}
-	j = 0;
-	p[i++ + j] = del;
-	while (s2[j] != 0)
-	{
-		p[i + j] = s2[j];
-		j++;
-	}
-	p[i + j] = 0;
-	return (p);
-}
-
-char	**free_arr(char **arr)
-{
-	int	i;
-
-	i = 0;
-	while (arr[i])
-	{
-		free(arr[i]);
-		i++;
-	}
-	free(arr);
-	return ((char **)0);
-}
-
-char 	*resolve_path(char **envp, char *cmd)
-{
-	int	i;
 	char	*path;
 	char	**paths;
 
@@ -98,12 +42,11 @@ char 	*resolve_path(char **envp, char *cmd)
 
 int	exec_cmd(char *cmd, char **envp)
 {
-	char **args;
-	char *path;
-	
+	char	**args;
+	char	*path;
+
 	args = ft_split(cmd, ' ');
 	path = resolve_path(envp, args[0]);
-	
 	if (!path)
 	{
 		perror(args[0]);
@@ -117,78 +60,84 @@ int	exec_cmd(char *cmd, char **envp)
 	return (0);
 }
 
-int pipex(char *file1, char *cmd1, char *cmd2, char *file2, char *envp[]) {
-	int fd[2];
-	int pid;
-	int file;
-	char **argv;
+int	pipex_input(char **envp, char *file, char *cmd, int fd_output)
+{
+	int	fd_input;
 
-	argv = 0;
+	fd_input = open(file, O_RDONLY);
+	if (fd_input == -1)
+	{
+		perror(file);
+		return (3);
+	}
+	printf("Input file opened %d\n", fd_input);
+	dup2(fd_input, STDIN_FILENO);
+	close(fd_input);
+	dup2(fd_output, STDOUT_FILENO);
+	return (exec_cmd(cmd, envp));
+}
 
-	if (pipe(fd) == -1) {
-		perror("pipe");
+int	pipex_output(char **envp, char *file, char *cmd, int fd_input)
+{
+	int	fd_output;
+
+	fd_output = open(file, O_WRONLY);
+	if (fd_output == -1)
+	{
+		perror(file);
+		return (3);
+	}
+	printf("Output file opened %d\n", fd_output);
+	if (dup2(fd_input, STDIN_FILENO) == -1)
+	{
+		printf("Dup2 error STDIN\n");
+	}
+	if (dup2(fd_output, STDOUT_FILENO) == -1)
+	{
+		printf("Dup2 error STOUT\n");
+	}
+	return (exec_cmd(cmd, envp));
+}
+
+int	pipex(char *file1, char *cmd1, char *cmd2, char *file2, char *envp[])
+{
+	int	fd[2];
+	int	pid;
+
+	if (pipe(fd) == -1)
+	{
+		perror("Problem opening a pipe");
 		return (1);
 	}
 	printf("Pipe opened: %d %d\n", fd[0], fd[1]);
 	pid = fork();
-	if (pid == -1) {
-		// Error handling for fork error
+	if (pid == -1)
+	{
+		perror("Error forking process");
 		return (2);
 	}
-
-
-	if (pid == 0) {
-		printf("Child process\n");
+	if (pid == 0)
+	{
 		close(fd[0]);
-
-
-		file = open(file1, O_RDONLY);
-		if (file == -1) {
-			perror(file1);
-			return (3);
-		}
-		printf("Input file opened %d\n", file);
-		dup2(file, STDIN_FILENO);
-		close(file);
-		dup2(fd[1], STDOUT_FILENO);
-		exec_cmd(cmd1, envp);
-
-
+		pipex_input(envp, file1, cmd1, fd[1]);
 	}
-	if (pid > 0) {
-		printf("Parent process\n");
+	if (pid > 0)
+	{
 		close(fd[1]);
 		wait(0);
 		// Error handling for child process
-		
-
-		file = open(file2, O_WRONLY);
-		if (file == -1) {
-			perror(file2);
-			return (3);
-		}
-		printf("Output file opened %d\n", file);
-		if (dup2(fd[0], STDIN_FILENO) == -1)
-		{
-			printf("Dup2 error STDIN\n");
-		}
-		if (dup2(file, STDOUT_FILENO) == -1)
-		{
-			printf("Dup2 error STOUT\n");
-		}
-		exec_cmd(cmd2, envp);
-
-
+		pipex_output(envp, file2, cmd2, fd[0]);
 	}
 	return (0);
 }
 
-int	main(int argc, char *argv[], char *envp[]) {
-	if (argc != 5) {
+int	main(int argc, char *argv[], char *envp[])
+{
+	if (argc != 5)
+	{
 		write(2, "Wrong number of arguments\n", 26);
 		return (1);
 	}
 	pipex(argv[1], argv[2], argv[3], argv[4], envp);
 	return (0);
 }
-
