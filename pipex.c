@@ -6,7 +6,7 @@
 /*   By: stiffiny <stiffiny@student.21-school.ru>   +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/09 17:21:51 by stiffiny          #+#    #+#             */
-/*   Updated: 2021/10/09 19:22:51 by stiffiny         ###   ########.fr       */
+/*   Updated: 2021/10/09 19:33:51 by stiffiny         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,7 +41,7 @@ int	exec_cmd(char *cmd, char **envp)
 		free(path);
 		return (10);
 	}
-	return (0);
+	return (-1);
 }
 
 int	pipex_input(char **envp, char *file, char *cmd, int fd_output)
@@ -78,6 +78,7 @@ int	main(int argc, char *argv[], char *envp[])
 {
 	int	fd[2];
 	int	pid;
+	int	status;
 
 	if (argc != 5)
 		return (error_exit(1, "Wrong number of arguments\n"));
@@ -94,8 +95,9 @@ int	main(int argc, char *argv[], char *envp[])
 	if (pid > 0)
 	{
 		close(fd[1]);
-		if (wait(0) == -1)
-			return (perror_exit(4, "Child process error"));
+		wait(&status);
+		if (status != 0)
+			return (error_exit(status, "Child process error"));
 		pipex_output(envp, argv[4], argv[3], fd[0]);
 	}
 	return (0);
